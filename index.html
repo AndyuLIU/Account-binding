@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>oásis 身份綁定</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #2D5A4B;
+      --green-light: #3a7060;
+      --green-pale: #e8f0ec;
+      --cream: #f7f4ef;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --border: #c8d4ce;
+      --error: #c0392b;
+      --success: #2D5A4B;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-weight: 300;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 400px;
+      background: #fff;
+      border-radius: 2px;
+      overflow: hidden;
+      box-shadow: 0 2px 24px rgba(45,90,75,0.08);
+    }
+
+    .card-header {
+      background: var(--green);
+      padding: 36px 32px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header::before {
+      content: 'oásis';
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 80px;
+      font-weight: 300;
+      font-style: italic;
+      color: rgba(255,255,255,0.06);
+      position: absolute;
+      right: -8px;
+      bottom: -16px;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 300;
+      font-style: italic;
+      color: #fff;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.65);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .card-body {
+      padding: 32px;
+    }
+
+    .intro {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 28px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--green-pale);
+    }
+
+    .field {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--text);
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-appearance: none;
+    }
+
+    input:focus {
+      border-color: var(--green);
+      background: #fff;
+    }
+
+    input::placeholder {
+      color: #b0b8b4;
+      font-size: 13px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      margin-top: 8px;
+      background: var(--green);
+      color: #fff;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .btn:hover { background: var(--green-light); }
+    .btn:active { opacity: 0.85; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .msg {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 2px;
+      font-size: 13px;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .msg.success {
+      background: var(--green-pale);
+      color: var(--success);
+      border-left: 3px solid var(--green);
+      display: block;
+    }
+
+    .msg.error {
+      background: #fdf2f2;
+      color: var(--error);
+      border-left: 3px solid var(--error);
+      display: block;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(247,244,239,0.85);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 100;
+    }
+
+    .loading-overlay.show { display: flex; }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--green-pale);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .loading-text {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .footer {
+      text-align: center;
+      padding: 16px 32px 24px;
+      font-size: 11px;
+      color: var(--border);
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text">載入中</div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="brand">oásis</div>
+    <div class="subtitle">員工身份綁定</div>
+  </div>
+
+  <div class="card-body">
+    <p class="intro">請填寫以下資料完成 LINE 帳號綁定，綁定後即可使用請假、公告等功能。</p>
+
+    <form id="bindForm">
+      <div class="field">
+        <label for="name">本名</label>
+        <input type="text" id="name" placeholder="請輸入本名" autocomplete="name" required>
+      </div>
+      <div class="field">
+        <label for="phone">聯絡電話</label>
+        <input type="tel" id="phone" placeholder="請輸入手機號碼" autocomplete="tel" required>
+      </div>
+      <button type="submit" class="btn" id="submitBtn">確認綁定</button>
+      <div class="msg" id="msg"></div>
+    </form>
+  </div>
+
+  <div class="footer">© oásis salon</div>
+</div>
+
+<script>
+  const LIFF_ID = '2010320837-8ZWZ4DWy';
+  const WEBHOOK_URL = 'https://andy1996.zeabur.app/webhook-test/e9c94901-4443-4b1f-8833-dbc724794e7d/webhook';
+
+  let lineUserId = null;
+
+  const loading = document.getElementById('loading');
+  const form = document.getElementById('bindForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const msg = document.getElementById('msg');
+
+  function showMsg(text, type) {
+    msg.textContent = text;
+    msg.className = 'msg ' + type;
+  }
+
+  async function initLiff() {
+    loading.classList.add('show');
+    try {
+      await liff.init({ liffId: LIFF_ID });
+      if (!liff.isLoggedIn()) {
+        liff.login();
+        return;
+      }
+      const profile = await liff.getProfile();
+      lineUserId = profile.userId;
+    } catch (e) {
+      showMsg('初始化失敗，請關閉後重新開啟。', 'error');
+    } finally {
+      loading.classList.remove('show');
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!lineUserId) {
+      showMsg('無法取得 LINE 帳號資訊，請重新開啟頁面。', 'error');
+      return;
+    }
+
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+
+    if (!name || !phone) {
+      showMsg('請填寫所有欄位。', 'error');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '送出中…';
+    msg.className = 'msg';
+
+    try {
+      const res = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lineUserId, name, phone })
+      });
+
+      if (res.ok) {
+        showMsg('綁定資料已送出，系統確認後將通知你結果。', 'success');
+        submitBtn.textContent = '已送出';
+        form.querySelectorAll('input').forEach(i => i.disabled = true);
+      } else {
+        throw new Error('server error');
+      }
+    } catch {
+      showMsg('送出失敗，請稍後再試。', 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = '確認綁定';
+    }
+  });
+
+  initLiff();
+</script>
+</body>
+</html>
