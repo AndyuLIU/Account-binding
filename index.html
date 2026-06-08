@@ -275,8 +275,11 @@
         liff.login();
         return;
       }
-      const profile = await liff.getProfile();
-      lineUserId = profile.userId;
+      const decodedToken = liff.getDecodedIDToken();
+      lineUserId = decodedToken && decodedToken.sub ? decodedToken.sub : "";
+
+      if (!lineUserId) {
+      throw new Error("LINE user id is unavailable.");
     } catch (e) {
       showMsg('初始化失敗，請關閉後重新開啟。', 'error');
     } finally {
