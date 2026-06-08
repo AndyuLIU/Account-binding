@@ -1,333 +1,276 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>oásis 身份綁定</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
   <style>
     :root {
-      --green: #2D5A4B;
-      --green-light: #3a7060;
-      --green-pale: #e8f0ec;
-      --cream: #f7f4ef;
-      --text: #1a1a1a;
-      --muted: #6b6b6b;
-      --border: #c8d4ce;
-      --error: #c0392b;
+      --brand: #2D5A4B;
+      --brand-dark: #1d3e34;
+      --bg: #f6f9f7;
+      --text: #17231f;
+      --muted: #64736d;
+      --line: #d6e1dc;
+      --danger: #b3261e;
       --success: #2D5A4B;
+      --white: #ffffff;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
-      font-family: 'Noto Sans TC', sans-serif;
-      font-weight: 300;
-      background: var(--cream);
-      color: var(--text);
+      margin: 0;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 20px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      line-height: 1.5;
     }
 
-    .card {
-      width: 100%;
-      max-width: 400px;
-      background: #fff;
-      border-radius: 2px;
-      overflow: hidden;
-      box-shadow: 0 2px 24px rgba(45,90,75,0.08);
-    }
-
-    .card-header {
-      background: var(--green);
-      padding: 36px 32px 28px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card-header::before {
-      content: 'oásis';
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 80px;
-      font-weight: 300;
-      font-style: italic;
-      color: rgba(255,255,255,0.06);
-      position: absolute;
-      right: -8px;
-      bottom: -16px;
-      line-height: 1;
-      pointer-events: none;
+    main {
+      width: min(100%, 480px);
+      margin: 0 auto;
+      padding: 36px 18px 40px;
     }
 
     .brand {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 28px;
-      font-weight: 300;
-      font-style: italic;
-      color: #fff;
-      letter-spacing: 0.04em;
-      margin-bottom: 8px;
-    }
-
-    .subtitle {
-      font-size: 12px;
-      font-weight: 300;
-      color: rgba(255,255,255,0.65);
+      color: var(--brand);
+      font-size: 0.85rem;
+      font-weight: 800;
       letter-spacing: 0.12em;
       text-transform: uppercase;
     }
 
-    .card-body {
-      padding: 32px;
+    h1 {
+      margin: 10px 0 8px;
+      color: var(--brand-dark);
+      font-size: 2rem;
+      line-height: 1.15;
     }
 
-    .intro {
-      font-size: 13px;
+    .lead {
+      margin: 0 0 22px;
       color: var(--muted);
-      line-height: 1.8;
-      margin-bottom: 28px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--green-pale);
+      font-size: 0.98rem;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 22px;
+      box-shadow: 0 16px 36px rgba(45, 90, 75, 0.12);
     }
 
     .field {
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     label {
       display: block;
-      font-size: 11px;
-      font-weight: 400;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--green);
-      margin-bottom: 8px;
+      margin-bottom: 7px;
+      color: var(--brand-dark);
+      font-weight: 800;
+      font-size: 0.95rem;
     }
 
     input {
       width: 100%;
-      padding: 12px 14px;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 15px;
-      font-weight: 300;
+      min-height: 48px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--white);
       color: var(--text);
-      background: var(--cream);
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      outline: none;
-      transition: border-color 0.2s, background 0.2s;
-      -webkit-appearance: none;
+      font: inherit;
+      padding: 11px 12px;
     }
 
     input:focus {
-      border-color: var(--green);
-      background: #fff;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(45, 90, 75, 0.16);
+      outline: none;
     }
 
-    input::placeholder {
-      color: #b0b8b4;
-      font-size: 13px;
-    }
-
-    .btn {
+    button {
       width: 100%;
-      padding: 14px;
-      margin-top: 8px;
-      background: var(--green);
-      color: #fff;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 13px;
-      font-weight: 400;
-      letter-spacing: 0.12em;
-      border: none;
-      border-radius: 2px;
+      min-height: 50px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--brand);
+      color: var(--white);
       cursor: pointer;
-      transition: background 0.2s, opacity 0.2s;
-      -webkit-appearance: none;
+      font: inherit;
+      font-weight: 900;
     }
 
-    .btn:hover { background: var(--green-light); }
-    .btn:active { opacity: 0.85; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    button:disabled {
+      cursor: wait;
+      opacity: 0.7;
+    }
 
     .msg {
-      margin-top: 16px;
-      padding: 12px 14px;
-      border-radius: 2px;
-      font-size: 13px;
-      line-height: 1.6;
       display: none;
+      margin-top: 14px;
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 0.94rem;
+      font-weight: 700;
+      text-align: center;
     }
 
     .msg.success {
-      background: var(--green-pale);
-      color: var(--success);
-      border-left: 3px solid var(--green);
       display: block;
+      background: #e6efeb;
+      color: var(--success);
     }
 
     .msg.error {
-      background: #fdf2f2;
-      color: var(--error);
-      border-left: 3px solid var(--error);
+      display: block;
+      background: #fdeceb;
+      color: var(--danger);
+    }
+
+    .loading {
+      display: none;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .loading.show {
       display: block;
     }
 
-    .loading-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(247,244,239,0.85);
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 16px;
-      z-index: 100;
-    }
-
-    .loading-overlay.show { display: flex; }
-
-    .spinner {
-      width: 32px;
-      height: 32px;
-      border: 2px solid var(--green-pale);
-      border-top-color: var(--green);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    .loading-text {
-      font-size: 12px;
+    footer {
+      margin-top: 22px;
       color: var(--muted);
-      letter-spacing: 0.08em;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .footer {
+      font-size: 0.82rem;
       text-align: center;
-      padding: 16px 32px 24px;
-      font-size: 11px;
-      color: var(--border);
-      letter-spacing: 0.06em;
     }
   </style>
 </head>
 <body>
-
-<div class="loading-overlay" id="loading">
-  <div class="spinner"></div>
-  <div class="loading-text">載入中</div>
-</div>
-
-<div class="card">
-  <div class="card-header">
+  <main>
     <div class="brand">oásis</div>
-    <div class="subtitle">員工身份綁定</div>
-  </div>
+    <h1>員工身份綁定</h1>
+    <p class="lead">請填寫以下資料完成 LINE 帳號綁定，綁定後即可使用請假、公告等功能。</p>
 
-  <div class="card-body">
-    <p class="intro">請填寫以下資料完成 LINE 帳號綁定，綁定後即可使用請假、公告等功能。</p>
+    <section class="card">
+      <form id="bindForm">
+        <div class="field">
+          <label for="name">本名</label>
+          <input id="name" name="name" type="text" placeholder="請輸入本名" autocomplete="name" required>
+        </div>
 
-    <form id="bindForm">
-      <div class="field">
-        <label for="name">本名</label>
-        <input type="text" id="name" placeholder="請輸入本名" autocomplete="name" required>
-      </div>
-      <div class="field">
-        <label for="phone">聯絡電話</label>
-        <input type="tel" id="phone" placeholder="請輸入手機號碼" autocomplete="tel" required>
-      </div>
-      <button type="submit" class="btn" id="submitBtn">確認綁定</button>
-      <div class="msg" id="msg"></div>
-    </form>
-  </div>
+        <div class="field">
+          <label for="phone">聯絡電話</label>
+          <input id="phone" name="phone" type="tel" placeholder="請輸入手機號碼" autocomplete="tel" inputmode="tel" required>
+        </div>
 
-  <div class="footer">© oásis salon</div>
-</div>
+        <button id="submitBtn" type="submit">確認綁定</button>
+        <div id="loading" class="loading">正在初始化 LINE 資料...</div>
+        <div id="msg" class="msg"></div>
+      </form>
+    </section>
 
-<script>
-  const LIFF_ID = "2010336788-imRmBbp9";
-  const WEBHOOK_URL = "https://andy1996.zeabur.app/webhook-test/698ca559-e590-4238-a4a1-45f423978130";
+    <footer>© oásis salon</footer>
+  </main>
 
-  let lineUserId = null;
+  <script>
+    const LIFF_ID = "2010336788-imRmBbp9";
+    const WEBHOOK_URL = "https://andy1996.zeabur.app/webhook-test/698ca559-e590-4238-a4a1-45f423978130";
 
-  const loading = document.getElementById('loading');
-  const form = document.getElementById('bindForm');
-  const submitBtn = document.getElementById('submitBtn');
-  const msg = document.getElementById('msg');
+    let lineUserId = "";
 
-  function showMsg(text, type) {
-    msg.textContent = text;
-    msg.className = 'msg ' + type;
-  }
+    const loading = document.getElementById("loading");
+    const form = document.getElementById("bindForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const msg = document.getElementById("msg");
 
-  async function initLiff() {
-    loading.classList.add('show');
-    try {
-      await liff.init({ liffId: LIFF_ID });
-      if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
+    function showMsg(text, type) {
+      msg.textContent = text;
+      msg.className = "msg " + type;
+    }
+
+    async function initLiff() {
+      loading.classList.add("show");
+
+      try {
+        await liff.init({ liffId: LIFF_ID });
+
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
+
+        const decodedToken = liff.getDecodedIDToken();
+        lineUserId = decodedToken && decodedToken.sub ? decodedToken.sub : "";
+
+        if (!lineUserId) {
+          throw new Error("LINE user id is unavailable.");
+        }
+      } catch (e) {
+        showMsg("初始化失敗，請關閉後重新開啟。", "error");
+      } finally {
+        loading.classList.remove("show");
       }
-      const decodedToken = liff.getDecodedIDToken();
-      lineUserId = decodedToken && decodedToken.sub ? decodedToken.sub : "";
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
       if (!lineUserId) {
-      throw new Error("LINE user id is unavailable.");
-    } catch (e) {
-      showMsg('初始化失敗，請關閉後重新開啟。', 'error');
-    } finally {
-      loading.classList.remove('show');
-    }
-  }
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!lineUserId) {
-      showMsg('無法取得 LINE 帳號資訊，請重新開啟頁面。', 'error');
-      return;
-    }
-
-    const name = document.getElementById('name').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-
-    if (!name || !phone) {
-      showMsg('請填寫所有欄位。', 'error');
-      return;
-    }
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = '送出中…';
-    msg.className = 'msg';
-
-    try {
-      const res = await fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lineUserId, name, phone })
-      });
-
-      if (res.ok) {
-        showMsg('綁定資料已送出，系統確認後將通知你結果。', 'success');
-        submitBtn.textContent = '已送出';
-        form.querySelectorAll('input').forEach(i => i.disabled = true);
-      } else {
-        throw new Error('server error');
+        showMsg("無法取得 LINE 帳號資訊，請重新開啟頁面。", "error");
+        return;
       }
-    } catch {
-      showMsg('送出失敗，請稍後再試。', 'error');
-      submitBtn.disabled = false;
-      submitBtn.textContent = '確認綁定';
-    }
-  });
 
-  initLiff();
-</script>
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+
+      if (!name || !phone) {
+        showMsg("請填寫所有欄位。", "error");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "送出中...";
+      msg.className = "msg";
+
+      try {
+        const res = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            lineUserId: lineUserId,
+            name: name,
+            phone: phone
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error("Webhook failed");
+        }
+
+        showMsg("綁定資料已送出，請稍候", "success");
+        submitBtn.textContent = "已送出";
+        form.querySelectorAll("input").forEach((input) => {
+          input.disabled = true;
+        });
+      } catch (e) {
+        showMsg("送出失敗，請重試", "error");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "確認綁定";
+      }
+    });
+
+    initLiff();
+  </script>
 </body>
 </html>
