@@ -1,272 +1,358 @@
-<!doctype html>
-<html lang="zh-Hant">
+<!DOCTYPE html>
+<html lang="zh-TW">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>oásis 身份綁定</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>oásis — 員工身份綁定</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
-    :root {
-      --brand: #2D5A4B;
-      --brand-dark: #1d3e34;
-      --bg: #f6f9f7;
-      --text: #17231f;
-      --muted: #64736d;
-      --line: #d6e1dc;
-      --danger: #b3261e;
-      --success: #2D5A4B;
-      --white: #ffffff;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    * {
-      box-sizing: border-box;
+    :root {
+      --green: #2D5A4B;
+      --green-dark: #1e3e33;
+      --green-light: #e8f0ee;
+      --text: #1a1a1a;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --error: #dc2626;
+      --radius: 10px;
     }
 
     body {
-      margin: 0;
-      min-height: 100vh;
-      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      background: #f5f7f6;
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-      line-height: 1.5;
-    }
-
-    main {
-      width: min(100%, 480px);
-      margin: 0 auto;
-      padding: 36px 18px 40px;
-    }
-
-    .brand {
-      color: var(--brand);
-      font-size: 0.85rem;
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      margin: 10px 0 8px;
-      color: var(--brand-dark);
-      font-size: 2rem;
-      line-height: 1.15;
-    }
-
-    .lead {
-      margin: 0 0 22px;
-      color: var(--muted);
-      font-size: 0.98rem;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 24px 16px 48px;
     }
 
     .card {
-      background: var(--white);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 22px;
-      box-shadow: 0 16px 36px rgba(45, 90, 75, 0.12);
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.08);
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
     }
 
-    .field {
+    .card-header {
+      background: var(--green);
+      padding: 28px 24px 24px;
+      color: #fff;
+    }
+
+    .brand {
+      font-size: 13px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      opacity: .75;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .card-header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      margin-bottom: 10px;
+    }
+
+    .card-header p {
+      font-size: 13.5px;
+      line-height: 1.6;
+      opacity: .85;
+    }
+
+    .card-body {
+      padding: 28px 24px 24px;
+    }
+
+    .form-group {
       margin-bottom: 18px;
     }
 
     label {
       display: block;
-      margin-bottom: 7px;
-      color: var(--brand-dark);
-      font-weight: 800;
-      font-size: 0.95rem;
-    }
-
-    input {
-      width: 100%;
-      min-height: 48px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--white);
+      font-size: 13.5px;
+      font-weight: 600;
       color: var(--text);
-      font: inherit;
-      padding: 11px 12px;
+      margin-bottom: 6px;
     }
 
-    input:focus {
-      border-color: var(--brand);
-      box-shadow: 0 0 0 3px rgba(45, 90, 75, 0.16);
-      outline: none;
+    label .req {
+      color: var(--error);
+      margin-left: 2px;
     }
 
-    button {
+    input, select {
       width: 100%;
-      min-height: 50px;
-      border: 0;
-      border-radius: 6px;
-      background: var(--brand);
-      color: var(--white);
-      cursor: pointer;
-      font: inherit;
-      font-weight: 900;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 15px;
+      color: var(--text);
+      background: #fff;
+      transition: border-color .15s, box-shadow .15s;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
-    button:disabled {
-      cursor: wait;
-      opacity: 0.7;
+    input::placeholder { color: #9ca3af; }
+
+    input:focus, select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(45,90,75,.12);
     }
 
-    .msg {
-      display: none;
-      margin-top: 14px;
-      border-radius: 6px;
-      padding: 12px;
-      font-size: 0.94rem;
+    .select-wrap {
+      position: relative;
+    }
+
+    .select-wrap::after {
+      content: "";
+      pointer-events: none;
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .select-wrap select { padding-right: 36px; }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 14px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
       font-weight: 700;
-      text-align: center;
+      letter-spacing: .02em;
+      cursor: pointer;
+      transition: background .15s, opacity .15s;
+      margin-top: 8px;
     }
 
-    .msg.success {
-      display: block;
-      background: #e6efeb;
-      color: var(--success);
-    }
+    button[type="submit"]:hover { background: var(--green-dark); }
+    button[type="submit"]:disabled { opacity: .55; cursor: not-allowed; }
 
-    .msg.error {
-      display: block;
-      background: #fdeceb;
-      color: var(--danger);
-    }
-
-    .loading {
+    .status {
       display: none;
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 0.9rem;
+      margin-top: 16px;
+      padding: 13px 16px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
       text-align: center;
+      line-height: 1.5;
     }
 
-    .loading.show {
+    .status.success {
       display: block;
+      background: var(--green-light);
+      color: var(--green-dark);
+      border: 1.5px solid #b2cec6;
     }
 
-    footer {
-      margin-top: 22px;
-      color: var(--muted);
-      font-size: 0.82rem;
+    .status.error {
+      display: block;
+      background: #fef2f2;
+      color: var(--error);
+      border: 1.5px solid #fecaca;
+    }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      background: #f5f7f6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
       text-align: center;
+      padding: 32px;
+      z-index: 100;
+    }
+
+    #overlay.hidden { display: none; }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #d1d5db;
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #overlay p {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 260px;
+      line-height: 1.6;
+    }
+
+    #overlay p.err-msg {
+      color: var(--error);
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
-  <main>
-    <div class="brand">oásis</div>
-    <h1>員工身份綁定</h1>
-    <p class="lead">請填寫以下資料完成 LINE 帳號綁定，綁定後即可使用請假、公告等功能。</p>
 
-    <section class="card">
-      <form id="bindForm">
-        <div class="field">
-          <label for="name">本名</label>
-          <input id="name" name="name" type="text" placeholder="請輸入本名" autocomplete="name" required>
+  <div id="overlay">
+    <div class="spinner" id="spinner"></div>
+    <p id="overlay-msg">正在初始化，請稍候…</p>
+  </div>
+
+  <div class="card" id="main-card" style="display:none;">
+    <div class="card-header">
+      <div class="brand">oásis</div>
+      <h1>員工身份綁定</h1>
+      <p>請填寫以下資料完成 LINE 帳號綁定，綁定後即可使用請假、公告等功能。</p>
+    </div>
+
+    <div class="card-body">
+      <form id="binding-form" novalidate>
+
+        <div class="form-group">
+          <label for="name">本名<span class="req">*</span></label>
+          <input type="text" id="name" name="name" placeholder="請輸入本名" required autocomplete="name" />
         </div>
 
-        <div class="field">
-          <label for="phone">聯絡電話</label>
-          <input id="phone" name="phone" type="tel" placeholder="請輸入手機號碼" autocomplete="tel" inputmode="tel" required>
+        <div class="form-group">
+          <label for="nickname">暱稱（平時希望怎麼被稱呼）<span class="req">*</span></label>
+          <input type="text" id="nickname" name="nickname" placeholder="請輸入暱稱" required />
         </div>
 
-        <button id="submitBtn" type="submit">確認綁定</button>
-        <div id="loading" class="loading">正在初始化 LINE 資料...</div>
-        <div id="msg" class="msg"></div>
+        <div class="form-group">
+          <label for="title">職稱<span class="req">*</span></label>
+          <div class="select-wrap">
+            <select id="title" name="title" required>
+              <option value="">請選擇職稱</option>
+              <option value="設計師">設計師</option>
+              <option value="技術師">技術師</option>
+              <option value="櫃檯">櫃檯</option>
+              <option value="總部">總部</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">聯絡電話<span class="req">*</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="請輸入聯絡電話" required autocomplete="tel" />
+        </div>
+
+        <button type="submit" id="submit-btn">送出綁定</button>
+
+        <div class="status" id="status-msg"></div>
       </form>
-    </section>
-
-    <footer>© oásis salon</footer>
-  </main>
+    </div>
+  </div>
 
   <script>
     const LIFF_ID = "2010336788-imRmBbp9";
     const WEBHOOK_URL = "https://andy1996.zeabur.app/webhook-test/698ca559-e590-4238-a4a1-45f423978130";
 
-    let lineUserId = "";
+    const overlay     = document.getElementById("overlay");
+    const spinner     = document.getElementById("spinner");
+    const overlayMsg  = document.getElementById("overlay-msg");
+    const mainCard    = document.getElementById("main-card");
+    const form        = document.getElementById("binding-form");
+    const submitBtn   = document.getElementById("submit-btn");
+    const statusMsg   = document.getElementById("status-msg");
 
-    const loading = document.getElementById("loading");
-    const form = document.getElementById("bindForm");
-    const submitBtn = document.getElementById("submitBtn");
-    const msg = document.getElementById("msg");
+    let lineUserId = null;
 
-    function showMsg(text, type) {
-      msg.textContent = text;
-      msg.className = "msg " + type;
+    function showError(msg) {
+      spinner.style.display = "none";
+      overlayMsg.className = "err-msg";
+      overlayMsg.textContent = msg;
+    }
+
+    function showForm() {
+      overlay.classList.add("hidden");
+      mainCard.style.display = "block";
+    }
+
+    function setStatus(type, text) {
+      statusMsg.className = "status " + type;
+      statusMsg.textContent = text;
     }
 
     async function initLiff() {
-      loading.classList.add("show");
-
       try {
         await liff.init({ liffId: LIFF_ID });
-
-        if (!liff.isLoggedIn()) {
-          liff.login();
-          return;
-        }
-
-        const decodedToken = liff.getDecodedIDToken();
-        lineUserId = decodedToken && decodedToken.sub ? decodedToken.sub : "";
-
-        if (!lineUserId) {
-          throw new Error("LINE user id is unavailable.");
-        }
       } catch (e) {
-        showMsg("初始化失敗，請關閉後重新開啟。", "error");
-      } finally {
-        loading.classList.remove("show");
+        showError("初始化失敗，請關閉後重新開啟。");
+        return;
       }
+
+      if (!liff.isLoggedIn()) {
+        liff.login({ redirectUri: location.href });
+        return;
+      }
+
+      try {
+        const token = liff.getDecodedIDToken();
+        lineUserId = token.sub;
+      } catch (e) {
+        showError("初始化失敗，請關閉後重新開啟。");
+        return;
+      }
+
+      showForm();
     }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      if (!lineUserId) {
-        showMsg("無法取得 LINE 帳號資訊，請重新開啟頁面。", "error");
-        return;
-      }
+      const name     = form.name.value.trim();
+      const nickname = form.nickname.value.trim();
+      const title    = form.title.value;
+      const phone    = form.phone.value.trim();
 
-      const name = document.getElementById("name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-
-      if (!name || !phone) {
-        showMsg("請填寫所有欄位。", "error");
+      if (!name || !nickname || !title || !phone) {
+        setStatus("error", "請填寫所有必填欄位。");
         return;
       }
 
       submitBtn.disabled = true;
-      submitBtn.textContent = "送出中...";
-      msg.className = "msg";
+      setStatus("", "");
+      statusMsg.style.display = "none";
+
+      const payload = { lineUserId, name, nickname, title, phone };
 
       try {
         const res = await fetch(WEBHOOK_URL, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            lineUserId: lineUserId,
-            name: name,
-            phone: phone
-          })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         });
 
-        if (!res.ok) {
-          throw new Error("Webhook failed");
+        if (res.ok) {
+          setStatus("success", "綁定資料已送出，請稍候");
+          form.reset();
+        } else {
+          setStatus("error", "送出失敗，請重試");
+          submitBtn.disabled = false;
         }
-
-        showMsg("綁定資料已送出，請稍候", "success");
-        submitBtn.textContent = "已送出";
-        form.querySelectorAll("input").forEach((input) => {
-          input.disabled = true;
-        });
-      } catch (e) {
-        showMsg("送出失敗，請重試", "error");
+      } catch (err) {
+        setStatus("error", "送出失敗，請重試");
         submitBtn.disabled = false;
-        submitBtn.textContent = "確認綁定";
       }
     });
 
