@@ -131,19 +131,19 @@
     #submit-btn {
       width: 100%;
       padding: 14px;
-      background: var(--green);
-      color: #fff;
-      border: none;
+      background: #fff;
+      color: var(--green);
+      border: 2px solid var(--green);
       border-radius: var(--radius);
       font-size: 16px;
       font-weight: 700;
       letter-spacing: .02em;
       cursor: pointer;
-      transition: background .15s, opacity .15s;
+      transition: background .15s, color .15s, opacity .15s;
       margin-top: 8px;
     }
 
-    #submit-btn:hover { background: var(--green-dark); }
+    #submit-btn:hover { background: var(--green-light); }
     #submit-btn:disabled { opacity: .55; cursor: not-allowed; }
 
     .status {
