@@ -320,10 +320,10 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const name     = form.name.value.trim();
-      const nickname = form.nickname.value.trim();
-      const title    = form.title.value;
-      const phone    = form.phone.value.trim();
+      const name     = form.elements.name.value.trim();
+      const nickname = form.elements.nickname.value.trim();
+      const title    = form.elements.title.value;
+      const phone    = form.elements.phone.value.trim();
 
       if (!name || !nickname || !title || !phone) {
         setStatus("error", "請填寫所有必填欄位。");
