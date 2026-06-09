@@ -365,6 +365,20 @@
         </div>
 
         <div class="form-group">
+          <label for="branch">分店<span class="req">*</span></label>
+          <div class="select-wrap">
+            <select id="branch" name="branch" required>
+              <option value="">請選擇分店</option>
+              <option value="民權店">民權店</option>
+              <option value="公館店">公館店</option>
+              <option value="台大店">台大店</option>
+              <option value="保安店">保安店</option>
+              <option value="總部">總部</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
           <label for="phone">聯絡電話<span class="req">*</span></label>
           <input type="tel" id="phone" name="phone" placeholder="請輸入聯絡電話" required autocomplete="tel" />
         </div>
@@ -437,9 +451,10 @@
         const name     = document.getElementById("name").value.trim();
         const nickname = document.getElementById("nickname").value.trim();
         const title    = document.getElementById("title").value;
+        const branch   = document.getElementById("branch").value;
         const phone    = document.getElementById("phone").value.trim();
 
-        if (!name || !nickname || !title || !phone) {
+        if (!name || !nickname || !title || !branch || !phone) {
           setStatus("error", "請填寫所有必填欄位。");
           return;
         }
@@ -452,7 +467,7 @@
         submitBtn.disabled = true;
         statusMsg.style.display = "none";
 
-        const payload = { lineUserId, name, nickname, title, phone };
+        const payload = { lineUserId, name, nickname, title, branch, phone };
 
         const res = await fetch(WEBHOOK_URL, {
           method: "POST",
@@ -461,7 +476,7 @@
         });
 
         if (res.ok) {
-          showSuccess({ name, nickname, title, phone });
+          showSuccess({ name, nickname, title, branch, phone });
         } else {
           setStatus("error", "送出失敗，請重試（HTTP " + res.status + "）");
           submitBtn.disabled = false;
@@ -472,11 +487,12 @@
       }
     }
 
-    function showSuccess({ name, nickname, title, phone }) {
+    function showSuccess({ name, nickname, title, branch, phone }) {
       const rows = [
         ["本名", name],
         ["暱稱", nickname],
         ["職稱", title],
+        ["分店", branch],
         ["聯絡電話", phone],
       ];
       successInfo.innerHTML = rows.map(([label, value]) =>
