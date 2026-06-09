@@ -320,23 +320,27 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const name     = form.elements.name.value.trim();
-      const nickname = form.elements.nickname.value.trim();
-      const title    = form.elements.title.value;
-      const phone    = form.elements.phone.value.trim();
-
-      if (!name || !nickname || !title || !phone) {
-        setStatus("error", "請填寫所有必填欄位。");
-        return;
-      }
-
-      submitBtn.disabled = true;
-      setStatus("", "");
-      statusMsg.style.display = "none";
-
-      const payload = { lineUserId, name, nickname, title, phone };
-
       try {
+        const name     = document.getElementById("name").value.trim();
+        const nickname = document.getElementById("nickname").value.trim();
+        const title    = document.getElementById("title").value;
+        const phone    = document.getElementById("phone").value.trim();
+
+        if (!name || !nickname || !title || !phone) {
+          setStatus("error", "請填寫所有必填欄位。");
+          return;
+        }
+
+        if (!lineUserId) {
+          setStatus("error", "無法取得 LINE 帳號，請關閉後重新開啟。");
+          return;
+        }
+
+        submitBtn.disabled = true;
+        statusMsg.style.display = "none";
+
+        const payload = { lineUserId, name, nickname, title, phone };
+
         const res = await fetch(WEBHOOK_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -347,11 +351,11 @@
           setStatus("success", "綁定資料已送出，請稍候");
           form.reset();
         } else {
-          setStatus("error", "送出失敗，請重試");
+          setStatus("error", "送出失敗，請重試（HTTP " + res.status + "）");
           submitBtn.disabled = false;
         }
       } catch (err) {
-        setStatus("error", "送出失敗，請重試");
+        setStatus("error", "送出失敗：" + (err.message || "未知錯誤"));
         submitBtn.disabled = false;
       }
     });
