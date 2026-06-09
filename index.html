@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>oásis 綁定 v4</title>
+  <title>oásis — 員工身份綁定</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -209,6 +209,104 @@
       color: var(--error);
       font-weight: 600;
     }
+
+    /* 成功畫面 */
+    #success-card {
+      display: none;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.08);
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    #success-card .success-header {
+      background: var(--green);
+      padding: 36px 24px 32px;
+    }
+
+    .checkmark {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .checkmark svg {
+      width: 34px;
+      height: 34px;
+      stroke: #fff;
+      stroke-width: 3;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    #success-card .success-header h2 {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    #success-card .success-header p {
+      color: rgba(255,255,255,.8);
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+
+    .success-body {
+      padding: 28px 24px;
+    }
+
+    .success-info {
+      background: var(--green-light);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .success-info .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13.5px;
+      padding: 5px 0;
+      border-bottom: 1px solid #c8ddd8;
+    }
+
+    .success-info .info-row:last-child { border-bottom: none; }
+
+    .success-info .info-label {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .success-info .info-value {
+      color: var(--green-dark);
+      font-weight: 600;
+    }
+
+    .close-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .close-btn:hover { background: var(--green-dark); }
   </style>
 </head>
 <body>
@@ -216,6 +314,21 @@
   <div id="overlay">
     <div class="spinner" id="spinner"></div>
     <p id="overlay-msg">正在初始化，請稍候…</p>
+  </div>
+
+  <!-- 成功畫面 -->
+  <div id="success-card">
+    <div class="success-header">
+      <div class="checkmark">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2>綁定完成！</h2>
+      <p>你的 LINE 帳號已成功綁定，<br>現在可以使用請假、公告等功能。</p>
+    </div>
+    <div class="success-body">
+      <div class="success-info" id="success-info"></div>
+      <button class="close-btn" onclick="closeLiff()">關閉視窗</button>
+    </div>
   </div>
 
   <div class="card" id="main-card" style="display:none;">
@@ -271,6 +384,8 @@
     const spinner     = document.getElementById("spinner");
     const overlayMsg  = document.getElementById("overlay-msg");
     const mainCard    = document.getElementById("main-card");
+    const successCard = document.getElementById("success-card");
+    const successInfo = document.getElementById("success-info");
     const form        = document.getElementById("binding-form");
     const submitBtn   = document.getElementById("submit-btn");
     const statusMsg   = document.getElementById("status-msg");
@@ -346,8 +461,7 @@
         });
 
         if (res.ok) {
-          setStatus("success", "綁定資料已送出，請稍候");
-          document.getElementById("binding-form").reset();
+          showSuccess({ name, nickname, title, phone });
         } else {
           setStatus("error", "送出失敗，請重試（HTTP " + res.status + "）");
           submitBtn.disabled = false;
@@ -355,6 +469,31 @@
       } catch (err) {
         setStatus("error", "送出失敗：" + (err.message || "未知錯誤"));
         submitBtn.disabled = false;
+      }
+    }
+
+    function showSuccess({ name, nickname, title, phone }) {
+      const rows = [
+        ["本名", name],
+        ["暱稱", nickname],
+        ["職稱", title],
+        ["聯絡電話", phone],
+      ];
+      successInfo.innerHTML = rows.map(([label, value]) =>
+        `<div class="info-row">
+          <span class="info-label">${label}</span>
+          <span class="info-value">${value}</span>
+        </div>`
+      ).join("");
+      mainCard.style.display = "none";
+      successCard.style.display = "block";
+    }
+
+    function closeLiff() {
+      if (liff.isInClient()) {
+        liff.closeWindow();
+      } else {
+        window.close();
       }
     }
 
