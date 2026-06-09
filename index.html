@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>oásis — 員工身份綁定</title>
+  <title>oásis 綁定 v4</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -256,7 +256,7 @@
           <input type="tel" id="phone" name="phone" placeholder="請輸入聯絡電話" required autocomplete="tel" />
         </div>
 
-        <button type="submit" id="submit-btn">送出綁定</button>
+        <button type="button" id="submit-btn" onclick="handleSubmit()">送出綁定</button>
 
         <div class="status" id="status-msg"></div>
       </form>
@@ -317,9 +317,7 @@
       showForm();
     }
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
+    async function handleSubmit() {
       try {
         const name     = document.getElementById("name").value.trim();
         const nickname = document.getElementById("nickname").value.trim();
@@ -349,7 +347,7 @@
 
         if (res.ok) {
           setStatus("success", "綁定資料已送出，請稍候");
-          form.reset();
+          document.getElementById("binding-form").reset();
         } else {
           setStatus("error", "送出失敗，請重試（HTTP " + res.status + "）");
           submitBtn.disabled = false;
@@ -358,7 +356,7 @@
         setStatus("error", "送出失敗：" + (err.message || "未知錯誤"));
         submitBtn.disabled = false;
       }
-    });
+    }
 
     initLiff();
   </script>
