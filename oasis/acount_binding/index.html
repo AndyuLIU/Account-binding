@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>oásis — 員工身份綁定</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #2D5A4B;
+      --green-dark: #1e3e33;
+      --green-light: #e8f0ee;
+      --text: #1a1a1a;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --error: #dc2626;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      background: #f5f7f6;
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 24px 16px 48px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.08);
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      background: var(--green);
+      padding: 28px 24px 24px;
+      color: #fff;
+    }
+
+    .brand {
+      font-size: 13px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      opacity: .75;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .card-header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      margin-bottom: 10px;
+    }
+
+    .card-header p {
+      font-size: 13.5px;
+      line-height: 1.6;
+      opacity: .85;
+    }
+
+    .card-body {
+      padding: 28px 24px 24px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    label .req {
+      color: var(--error);
+      margin-left: 2px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 15px;
+      color: var(--text);
+      background: #fff;
+      transition: border-color .15s, box-shadow .15s;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input::placeholder { color: #9ca3af; }
+
+    input:focus, select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(45,90,75,.12);
+    }
+
+    .select-wrap {
+      position: relative;
+    }
+
+    .select-wrap::after {
+      content: "";
+      pointer-events: none;
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .select-wrap select { padding-right: 36px; }
+
+    #submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: #fff;
+      color: var(--green);
+      border: 2px solid var(--green);
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .02em;
+      cursor: pointer;
+      transition: background .15s, color .15s, opacity .15s;
+      margin-top: 8px;
+    }
+
+    #submit-btn:hover { background: var(--green-light); }
+    #submit-btn:disabled { opacity: .55; cursor: not-allowed; }
+
+    .status {
+      display: none;
+      margin-top: 16px;
+      padding: 13px 16px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .status.success {
+      display: block;
+      background: var(--green-light);
+      color: var(--green-dark);
+      border: 1.5px solid #b2cec6;
+    }
+
+    .status.error {
+      display: block;
+      background: #fef2f2;
+      color: var(--error);
+      border: 1.5px solid #fecaca;
+    }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      background: #f5f7f6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      text-align: center;
+      padding: 32px;
+      z-index: 100;
+    }
+
+    #overlay.hidden { display: none; }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #d1d5db;
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #overlay p {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 260px;
+      line-height: 1.6;
+    }
+
+    #overlay p.err-msg {
+      color: var(--error);
+      font-weight: 600;
+    }
+
+    /* 成功畫面 */
+    #success-card {
+      display: none;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.08);
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    #success-card .success-header {
+      background: var(--green);
+      padding: 36px 24px 32px;
+    }
+
+    .checkmark {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .checkmark svg {
+      width: 34px;
+      height: 34px;
+      stroke: #fff;
+      stroke-width: 3;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    #success-card .success-header h2 {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    #success-card .success-header p {
+      color: rgba(255,255,255,.8);
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+
+    .success-body {
+      padding: 28px 24px;
+    }
+
+    .success-info {
+      background: var(--green-light);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .success-info .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13.5px;
+      padding: 5px 0;
+      border-bottom: 1px solid #c8ddd8;
+    }
+
+    .success-info .info-row:last-child { border-bottom: none; }
+
+    .success-info .info-label {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .success-info .info-value {
+      color: var(--green-dark);
+      font-weight: 600;
+    }
+
+    .close-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .close-btn:hover { background: var(--green-dark); }
+
+    /* 已綁定畫面 */
+    #already-card {
+      display: none;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.08);
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    #already-card .already-header {
+      background: #4b6fa5;
+      padding: 36px 24px 32px;
+    }
+
+    .shield {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .shield svg {
+      width: 34px;
+      height: 34px;
+      stroke: #fff;
+      stroke-width: 2.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    #already-card .already-header h2 {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    #already-card .already-header p {
+      color: rgba(255,255,255,.8);
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+
+    .already-body {
+      padding: 28px 24px;
+    }
+
+    .already-info {
+      background: #eef2f8;
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .already-info .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13.5px;
+      padding: 5px 0;
+      border-bottom: 1px solid #d0d9e8;
+    }
+
+    .already-info .info-row:last-child { border-bottom: none; }
+    .already-info .info-label { color: var(--muted); font-weight: 500; }
+    .already-info .info-value { color: #2c4a7a; font-weight: 600; }
+
+    .close-btn-blue {
+      width: 100%;
+      padding: 14px;
+      background: #4b6fa5;
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .close-btn-blue:hover { background: #3a5a8c; }
+  </style>
+</head>
+<body>
+
+  <div id="overlay">
+    <div class="spinner" id="spinner"></div>
+    <p id="overlay-msg">正在初始化，請稍候…</p>
+  </div>
+
+  <!-- 已綁定畫面 -->
+  <div id="already-card">
+    <div class="already-header">
+      <div class="shield">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h2>已完成身份綁定</h2>
+      <p>您的 LINE 帳號已綁定，<br>無需重複操作。</p>
+    </div>
+    <div class="already-body">
+      <div class="already-info" id="already-info"></div>
+      <button class="close-btn-blue" onclick="closeLiff()">關閉視窗</button>
+    </div>
+  </div>
+
+  <!-- 成功畫面 -->
+  <div id="success-card">
+    <div class="success-header">
+      <div class="checkmark">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2>綁定完成！</h2>
+      <p>你的 LINE 帳號已成功綁定，<br>現在可以使用請假、公告等功能。</p>
+    </div>
+    <div class="success-body">
+      <div class="success-info" id="success-info"></div>
+      <button class="close-btn" onclick="closeLiff()">關閉視窗</button>
+    </div>
+  </div>
+
+  <div class="card" id="main-card" style="display:none;">
+    <div class="card-header">
+      <div class="brand">oásis</div>
+      <h1>員工身份綁定</h1>
+      <p>請填寫以下資料完成 LINE 帳號綁定，綁定後即可使用請假、公告等功能。</p>
+    </div>
+
+    <div class="card-body">
+      <form id="binding-form" novalidate>
+
+        <div class="form-group">
+          <label for="name">本名<span class="req">*</span></label>
+          <input type="text" id="name" name="name" placeholder="請輸入本名" required autocomplete="name" />
+        </div>
+
+        <div class="form-group">
+          <label for="nickname">暱稱（平時希望怎麼被稱呼）<span class="req">*</span></label>
+          <input type="text" id="nickname" name="nickname" placeholder="請輸入暱稱" required />
+        </div>
+
+        <div class="form-group">
+          <label for="title">職稱<span class="req">*</span></label>
+          <div class="select-wrap">
+            <select id="title" name="title" required>
+              <option value="">請選擇職稱</option>
+              <option value="設計師">設計師</option>
+              <option value="技術師">技術師</option>
+              <option value="櫃檯">櫃檯</option>
+              <option value="總部">總部</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="branch">分店<span class="req">*</span></label>
+          <div class="select-wrap">
+            <select id="branch" name="branch" required>
+              <option value="">請選擇分店</option>
+              <option value="民權店">民權店</option>
+              <option value="公館店">公館店</option>
+              <option value="台大店">台大店</option>
+              <option value="保安店">保安店</option>
+              <option value="總部">總部</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">聯絡電話<span class="req">*</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="請輸入聯絡電話" required autocomplete="tel" />
+        </div>
+
+        <button type="button" id="submit-btn" onclick="handleSubmit()">送出綁定</button>
+
+        <div class="status" id="status-msg"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const LIFF_ID = "2010336788-imRmBbp9";
+    const WEBHOOK_URL = "https://andy1996.zeabur.app/webhook/698ca559-e590-4238-a4a1-45f423978130";
+    const LOOKUP_URL  = "https://andy1996.zeabur.app/webhook/employee-lookup";
+
+    const overlay     = document.getElementById("overlay");
+    const spinner     = document.getElementById("spinner");
+    const overlayMsg  = document.getElementById("overlay-msg");
+    const mainCard    = document.getElementById("main-card");
+    const alreadyCard = document.getElementById("already-card");
+    const alreadyInfo = document.getElementById("already-info");
+    const successCard = document.getElementById("success-card");
+    const successInfo = document.getElementById("success-info");
+    const form        = document.getElementById("binding-form");
+    const submitBtn   = document.getElementById("submit-btn");
+    const statusMsg   = document.getElementById("status-msg");
+
+    let lineUserId = null;
+
+    function showError(msg) {
+      spinner.style.display = "none";
+      overlayMsg.className = "err-msg";
+      overlayMsg.textContent = msg;
+    }
+
+    function showForm() {
+      overlay.classList.add("hidden");
+      mainCard.style.display = "block";
+    }
+
+    function showAlreadyBound(emp) {
+      const rows = [
+        ["本名", emp.name  || "—"],
+        ["職稱", emp.role  || "—"],
+        ["分店", emp.store || "—"],
+      ];
+      alreadyInfo.innerHTML = rows.map(([label, value]) =>
+        `<div class="info-row">
+          <span class="info-label">${label}</span>
+          <span class="info-value">${value}</span>
+        </div>`
+      ).join("");
+      overlay.classList.add("hidden");
+      alreadyCard.style.display = "block";
+    }
+
+    function setStatus(type, text) {
+      statusMsg.className = "status " + type;
+      statusMsg.textContent = text;
+    }
+
+    async function initLiff() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+      } catch (e) {
+        showError("初始化失敗，請關閉後重新開啟。");
+        return;
+      }
+
+      if (!liff.isLoggedIn()) {
+        liff.login({ redirectUri: location.href });
+        return;
+      }
+
+      try {
+        const token = liff.getDecodedIDToken();
+        lineUserId = token.sub;
+      } catch (e) {
+        showError("初始化失敗，請關閉後重新開啟。");
+        return;
+      }
+
+      // 查詢是否已綁定
+      try {
+        overlayMsg.textContent = "查詢綁定狀態…";
+        const res = await fetch(`${LOOKUP_URL}?lineUserId=${encodeURIComponent(lineUserId)}`);
+        if (res.ok) {
+          const emp = await res.json();
+          if (emp && emp.name) {
+            showAlreadyBound(emp);
+            return;
+          }
+        }
+      } catch (_) {
+        // lookup 失敗不擋表單，讓使用者繼續填
+      }
+
+      showForm();
+    }
+
+    async function handleSubmit() {
+      try {
+        const name     = document.getElementById("name").value.trim();
+        const nickname = document.getElementById("nickname").value.trim();
+        const title    = document.getElementById("title").value;
+        const branch   = document.getElementById("branch").value;
+        const phone    = document.getElementById("phone").value.trim();
+
+        if (!name || !nickname || !title || !branch || !phone) {
+          setStatus("error", "請填寫所有必填欄位。");
+          return;
+        }
+
+        if (!lineUserId) {
+          setStatus("error", "無法取得 LINE 帳號，請關閉後重新開啟。");
+          return;
+        }
+
+        submitBtn.disabled = true;
+        statusMsg.style.display = "none";
+
+        const payload = { lineUserId, name, nickname, title, branch, phone };
+
+        const res = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          showSuccess({ name, nickname, title, branch, phone });
+        } else {
+          setStatus("error", "送出失敗，請重試（HTTP " + res.status + "）");
+          submitBtn.disabled = false;
+        }
+      } catch (err) {
+        setStatus("error", "送出失敗：" + (err.message || "未知錯誤"));
+        submitBtn.disabled = false;
+      }
+    }
+
+    function showSuccess({ name, nickname, title, branch, phone }) {
+      const rows = [
+        ["本名", name],
+        ["暱稱", nickname],
+        ["職稱", title],
+        ["分店", branch],
+        ["聯絡電話", phone],
+      ];
+      successInfo.innerHTML = rows.map(([label, value]) =>
+        `<div class="info-row">
+          <span class="info-label">${label}</span>
+          <span class="info-value">${value}</span>
+        </div>`
+      ).join("");
+      mainCard.style.display = "none";
+      successCard.style.display = "block";
+    }
+
+    function closeLiff() {
+      if (liff.isInClient()) {
+        liff.closeWindow();
+      } else {
+        window.close();
+      }
+    }
+
+    initLiff();
+  </script>
+</body>
+</html>
