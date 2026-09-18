@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>oásis 設計師資料表</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #ECE8DE;
+    --panel: #FBFAF5;
+    --text: #262420;
+    --muted: #7A7568;
+    --accent: #46583F;
+    --accent-soft: #DCE3D3;
+    --clay: #B87C5C;
+    --border: #D9D3C4;
+    --chip-bg: #F1EEE3;
+    --chip-selected: #46583F;
+    --chip-selected-text: #FBFAF5;
+    --radius: 3px;
+    --serif: 'Fraunces', Georgia, 'Noto Serif TC', serif;
+    --sans: 'Work Sans', -apple-system, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #1D1C18;
+      --panel: #26241F;
+      --text: #EDEAE0;
+      --muted: #9C9787;
+      --accent: #9DB78E;
+      --accent-soft: #2E3728;
+      --clay: #D69A79;
+      --border: #3A382F;
+      --chip-bg: #2E2C25;
+      --chip-selected: #9DB78E;
+      --chip-selected-text: #1D1C18;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #1D1C18;
+    --panel: #26241F;
+    --text: #EDEAE0;
+    --muted: #9C9787;
+    --accent: #9DB78E;
+    --accent-soft: #2E3728;
+    --clay: #D69A79;
+    --border: #3A382F;
+    --chip-bg: #2E2C25;
+    --chip-selected: #9DB78E;
+    --chip-selected-text: #1D1C18;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:640px;
+    margin:0 auto;
+    padding:56px 24px 96px;
+  }
+  header{
+    margin-bottom:44px;
+  }
+  .eyebrow{
+    font-size:13px;
+    color:var(--muted);
+    letter-spacing:0.02em;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:var(--serif);
+    font-weight:500;
+    font-size:clamp(30px, 5vw, 40px);
+    margin:0 0 14px;
+    color:var(--text);
+  }
+  .lede{
+    color:var(--muted);
+    font-size:15px;
+    max-width:52ch;
+  }
+  section.card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:28px 26px;
+    margin-bottom:20px;
+  }
+  .field{
+    margin-bottom:22px;
+  }
+  .field:last-child{ margin-bottom:0; }
+  label{
+    display:block;
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .hint{
+    font-size:12.5px;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  select{
+    width:100%;
+    font-family:var(--sans);
+    font-size:15px;
+    color:var(--text);
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:11px 12px;
+    outline:none;
+    transition:border-color .15s;
+  }
+  select:focus{ border-color:var(--accent); }
+  input[type="text"], input[type="url"], textarea{
+    width:100%;
+    font-family:var(--sans);
+    font-size:15px;
+    color:var(--text);
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:11px 12px;
+    outline:none;
+    transition:border-color .15s;
+  }
+  input[type="text"]:focus, input[type="url"]:focus, textarea:focus{
+    border-color:var(--accent);
+  }
+  textarea{ resize:vertical; min-height:96px; }
+
+  .photo-row{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    flex-wrap:wrap;
+  }
+  .photo-options{ display:flex; flex-direction:column; gap:10px; flex:1; min-width:200px; }
+  .radio-line{ display:flex; align-items:center; gap:8px; font-size:14.5px; }
+  .radio-line input{ accent-color:var(--accent); width:16px; height:16px; }
+  .photo-preview{
+    width:88px; height:88px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:var(--chip-bg);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+    flex-shrink:0;
+    color:var(--muted);
+    font-size:11px;
+    text-align:center;
+  }
+  .photo-preview img{ width:100%; height:100%; object-fit:cover; }
+  input[type="file"]{
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  .service-group{ margin-bottom:18px; }
+  .service-group:last-child{ margin-bottom:0; }
+  .service-group h3{
+    font-family:var(--serif);
+    font-weight:500;
+    font-size:16px;
+    margin:0 0 10px;
+    color:var(--accent);
+  }
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{
+    position:relative;
+  }
+  .chip input{ position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer; }
+  .chip span{
+    display:inline-block;
+    padding:8px 14px;
+    background:var(--chip-bg);
+    border:1px solid var(--border);
+    border-radius:20px;
+    font-size:13.5px;
+    color:var(--text);
+    transition:background .12s, color .12s, border-color .12s;
+  }
+  .chip input:checked + span{
+    background:var(--chip-selected);
+    color:var(--chip-selected-text);
+    border-color:var(--chip-selected);
+  }
+  .chip input:focus-visible + span{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+
+  .generate-btn{
+    width:100%;
+    padding:14px;
+    font-family:var(--sans);
+    font-size:15px;
+    font-weight:600;
+    color:var(--chip-selected-text);
+    background:var(--accent);
+    border:none;
+    border-radius:var(--radius);
+    cursor:pointer;
+    transition:opacity .15s;
+  }
+  .generate-btn:hover{ opacity:0.88; }
+  .generate-btn:active{ opacity:0.75; }
+
+  #result-section{
+    display:none;
+  }
+  #result-section.show{ display:block; }
+  .result-box{
+    white-space:pre-wrap;
+    font-family:var(--sans);
+    font-size:13.5px;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:16px;
+    color:var(--text);
+    max-height:340px;
+    overflow-y:auto;
+  }
+  .copy-status{
+    font-size:13px;
+    color:var(--muted);
+  }
+  .note{
+    font-size:12.5px;
+    color:var(--muted);
+    margin-top:12px;
+  }
+  .error-msg{
+    font-size:13px;
+    color:var(--clay);
+    margin-top:8px;
+    display:none;
+  }
+  .error-msg.show{ display:block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">oásis 線上預約資料</div>
+    <h1>設計師檔案填寫</h1>
+    <p class="lede">填好後按「送出資料」，資料會直接送出，就完成了。</p>
+  </header>
+
+  <section class="card">
+    <div class="field">
+      <label for="name">姓名</label>
+      <div class="hint">可使用匿名或藝名</div>
+      <input type="text" id="name" placeholder="例如：阿光、Amber">
+    </div>
+
+    <div class="field">
+      <label for="branch">所屬分店</label>
+      <select id="branch">
+        <option value="">請選擇分店</option>
+        <option value="民權店">民權店</option>
+        <option value="公館店">公館店</option>
+        <option value="台大店">台大店</option>
+        <option value="保安店">保安店</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="bio">簡介</label>
+      <div class="hint">簡單介紹自己、擅長的服務、風格</div>
+      <textarea id="bio" placeholder="例如：專長自然系剪髮與霧感染色，喜歡先了解生活習慣再設計造型..."></textarea>
+    </div>
+
+    <div class="field">
+      <label for="ig">作品集連結（IG）</label>
+      <input type="url" id="ig" placeholder="https://instagram.com/...">
+    </div>
+
+    <div class="field">
+      <label for="line">諮詢連結（LINE）</label>
+      <input type="url" id="line" placeholder="https://line.me/... 或 LINE ID">
+    </div>
+
+    <div class="field">
+      <label>照片</label>
+      <div class="photo-row">
+        <div class="photo-preview" id="photoPreview">未選擇</div>
+        <div class="photo-options">
+          <label class="radio-line"><input type="radio" name="photoChoice" value="default" checked> 使用先前統一拍攝的形象照</label>
+          <label class="radio-line"><input type="radio" name="photoChoice" value="custom"> 我要另外提供照片</label>
+          <input type="file" id="photoFile" accept="image/*" disabled>
+        </div>
+      </div>
+      <div class="note">選擇「我要另外提供照片」時，送出資料會一併自動上傳你選擇的照片檔案。</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="field" style="margin-bottom:0;">
+      <label>服務項目</label>
+      <div class="hint">勾選你有提供的項目（可複選）</div>
+
+      <div class="service-group">
+        <h3>剪髮</h3>
+        <div class="chips">
+          <label class="chip"><input type="checkbox" value="洗髮"><span>洗髮</span></label>
+          <label class="chip"><input type="checkbox" value="洗剪"><span>洗剪</span></label>
+        </div>
+      </div>
+
+      <div class="service-group">
+        <h3>染髮</h3>
+        <div class="chips">
+          <label class="chip"><input type="checkbox" value="挑漂（需加染髮）"><span>挑漂（需加染髮）</span></label>
+          <label class="chip"><input type="checkbox" value="漂/染"><span>漂/染</span></label>
+          <label class="chip"><input type="checkbox" value="漂兩回"><span>漂兩回</span></label>
+          <label class="chip"><input type="checkbox" value="補漂"><span>補漂</span></label>
+        </div>
+      </div>
+
+      <div class="service-group">
+        <h3>燙髮</h3>
+        <div class="chips">
+          <label class="chip"><input type="checkbox" value="燙髮/縮毛矯正"><span>燙髮/縮毛矯正</span></label>
+        </div>
+      </div>
+
+      <div class="service-group">
+        <h3>護髮</h3>
+        <div class="chips">
+          <label class="chip"><input type="checkbox" value="NAKANO護髮"><span>NAKANO護髮</span></label>
+          <label class="chip"><input type="checkbox" value="京喚羽護髮"><span>京喚羽護髮</span></label>
+          <label class="chip"><input type="checkbox" value="頭皮理療"><span>頭皮理療</span></label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <button class="generate-btn" id="generateBtn">送出資料</button>
+  <div class="error-msg" id="errorMsg">請至少填寫姓名，再送出資料。</div>
+  <div class="copy-status" id="submitStatus" style="margin-top:10px;"></div>
+
+  <section class="card" id="result-section" style="margin-top:20px;">
+    <label>已送出以下內容</label>
+    <div class="result-box" id="resultBox"></div>
+  </section>
+</div>
+
+<script>
+  const WEBHOOK = 'https://andy1996.zeabur.app/webhook/designer-profile';
+
+  const photoRadios = document.querySelectorAll('input[name="photoChoice"]');
+  const photoFile = document.getElementById('photoFile');
+  const photoPreview = document.getElementById('photoPreview');
+  let hasCustomPhoto = false;
+  let photoFileName = '';
+
+  photoRadios.forEach(r => {
+    r.addEventListener('change', () => {
+      const isCustom = document.querySelector('input[name="photoChoice"]:checked').value === 'custom';
+      photoFile.disabled = !isCustom;
+      if(!isCustom){
+        photoPreview.textContent = '未選擇';
+        photoPreview.style.backgroundImage = '';
+        hasCustomPhoto = false;
+        photoFileName = '';
+      }
+    });
+  });
+
+  photoFile.addEventListener('change', () => {
+    const file = photoFile.files && photoFile.files[0];
+    if(!file){ hasCustomPhoto = false; return; }
+    photoFileName = file.name;
+    hasCustomPhoto = true;
+    try{
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        photoPreview.innerHTML = '<img src="' + e.target.result + '" alt="照片預覽">';
+      };
+      reader.readAsDataURL(file);
+    }catch(err){
+      photoPreview.textContent = '預覽失敗';
+    }
+  });
+
+  document.getElementById('generateBtn').addEventListener('click', async () => {
+    const name = document.getElementById('name').value.trim();
+    const errorMsg = document.getElementById('errorMsg');
+    const submitStatus = document.getElementById('submitStatus');
+    if(!name){
+      errorMsg.classList.add('show');
+      return;
+    }
+    errorMsg.classList.remove('show');
+    submitStatus.textContent = '';
+
+    const branch = document.getElementById('branch').value;
+    const bio = document.getElementById('bio').value.trim();
+    const ig = document.getElementById('ig').value.trim();
+    const line = document.getElementById('line').value.trim();
+    const photoChoice = document.querySelector('input[name="photoChoice"]:checked').value;
+    const services = Array.from(document.querySelectorAll('.chip input:checked')).map(el => el.value);
+
+    if(photoChoice === 'custom' && !hasCustomPhoto){
+      errorMsg.textContent = '請選擇要上傳的照片檔案，再送出資料。';
+      errorMsg.classList.add('show');
+      return;
+    }
+    errorMsg.textContent = '請至少填寫姓名，再送出資料。';
+
+    const photoLine = photoChoice === 'custom' ? '自行提供（已上傳）' : '使用先前統一拍攝的形象照';
+
+    const lines = [
+      '姓名：' + name,
+      '所屬分店：' + (branch || '（未填寫）'),
+      '簡介：' + (bio || '（未填寫）'),
+      '作品集連結（IG）：' + (ig || '（未填寫）'),
+      '諮詢連結（LINE）：' + (line || '（未填寫）'),
+      '照片：' + photoLine,
+      '服務項目：' + (services.length ? services.join('、') : '（未勾選）')
+    ];
+
+    const generateBtn = document.getElementById('generateBtn');
+    generateBtn.disabled = true;
+    submitStatus.textContent = '送出中…';
+
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('branch', branch);
+    formData.append('bio', bio);
+    formData.append('ig', ig);
+    formData.append('line', line);
+    formData.append('photoChoice', photoChoice);
+    formData.append('services', JSON.stringify(services));
+    formData.append('submittedAt', new Date().toISOString());
+    formData.append('source', 'oasis_designer_profile');
+    if(photoChoice === 'custom' && photoFile.files[0]){
+      formData.append('photo', photoFile.files[0], photoFileName);
+    }
+
+    try{
+      const res = await fetch(WEBHOOK, {
+        method: 'POST',
+        body:   formData
+      });
+      if(!res.ok) throw new Error('submit failed: ' + res.status);
+
+      document.getElementById('resultBox').textContent = lines.join('\n');
+      document.getElementById('result-section').classList.add('show');
+      document.getElementById('result-section').scrollIntoView({behavior:'smooth', block:'start'});
+      submitStatus.textContent = '已送出，我們已收到你的資料！';
+    }catch(err){
+      submitStatus.textContent = '送出失敗，請稍後再試一次，或直接聯絡我們。';
+    }finally{
+      generateBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
